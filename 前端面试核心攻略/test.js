@@ -1,17 +1,12 @@
-function A() {}
-function B(a) {
-    this.a = a;
+// 创建一个Dog构造函数
+function Dog (name, age) {
+    this.name = name
+    this.age = age
 }
-function C(a) {
-    if (a) {
-        this.a = a;
-    }
+Dog.prototype.eat = function () {
+    console.log(this.name, this.age, '肉骨头真好吃')
 }
-A.prototype.a = 1;
-B.prototype.a = 1;
-C.prototype.a = 1;
+// 使用Dog构造函数创建dog实例
+const dog = new Dog('旺财', 3)
 
-console.log(new A().a); // 1
-console.log(new B().a); // undefined
-console.log(new C().a); // 1
-console.log(new C(2).a); // 2
+dog.eat()
