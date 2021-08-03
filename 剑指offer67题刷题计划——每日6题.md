@@ -2058,7 +2058,234 @@ public:
 
 ##### No.52 [正则表达式匹配](https://www.nowcoder.com/practice/28970c15befb4ff3a264189087b99ad4?tpId=13&tags=&title=&difficulty=0&judgeStatus=0&rp=1)
 
-> 请实现一个函数用来匹配包括'.'和'*'的正则表达式。模式中的字符'.'表示任意一个字符，而'*'表示它前面的字符可以出现任意次（包含0次）。 在本题中，匹配是指字符串的所有字符匹配整个模式。例如，字符串"aaa"与模式"a.a"和"ab*ac*a"匹配，但是与"aa.a"和"ab*a"均不匹配
+> 请实现一个函数用来匹配包括'.'和'\*'的正则表达式。模式中的字符'.'表示任意一个字符，而'\*'表示它前面的字符可以出现任意次（包含0次）。 在本题中，匹配是指字符串的所有字符匹配整个模式。例如，字符串"aaa"与模式"a.a"和"ab\*ac\*a"匹配，但是与"aa.a"和"ab*a"均不匹配
 
+##### No.53 [表示数值的字符串](https://www.nowcoder.com/practice/e69148f8528c4039ad89bb2546fd4ff8?tpId=13&tags=&title=&difficulty=0&judgeStatus=0&rp=1)
 
+> 请实现一个函数用来判断字符串是否表示数值（包括整数和小数）。例如，字符串"+100","5e2","-123","3.1416"和"-1E-16"都表示数值。 但是"12e","1a3.14","1.2.3","+-5"和"12e+4.3"都不是
+
+1、判断一下正负号,只能出现在首位和e后面一位，如果不是，返回False；
+
+2、判断小数点，只能出现0或1次，不能在e后面出现，如果不是，返回False；
+
+3、判断是否出现过数字；
+
+4、判断字符e，前后都必须有数字，还需要再判断一下e后面是否出现数字（见代码），只能出现0或1次，如果不是，返回False；
+
+```c++
+class Solution {
+public:
+    bool isNumeric(string str) {
+        bool hasPoint=false,hasE=false,hasSymbol=false,hasNum=false;
+        for(int i=0;i<str.size();i++){
+            if(str[i]=='+'||str[i]=='-'){
+                if(i!=0){
+                    if(str[i-1]=='e'||str[i-1]=='E'){
+                        if(str[i+1]<='9'&&str[i+1]>='0'){
+                            continue;
+                        }
+                    }
+                    return false;
+                }else{
+                    if(str[i+1]!='\000'){
+                        hasSymbol=true;
+                    }else{
+                        return false;
+                    }
+                }
+            }else if(str[i]<='9'&&str[i]>='0'){
+                hasNum=true;
+                continue;
+            }else if(str[i]=='e'||str[i]=='E'){
+                hasE=true;
+                if(i+1==str.size()){
+                    return false;
+                }
+                if(str[i-1]<='9'&&str[i-1]>='0'){
+                    continue;
+                }else{
+                    return false;
+                }
+            }else if(str[i]=='.'){
+                if(hasPoint){
+                    return false;
+                }else if(hasE){
+                    return false;
+                }else{
+                    hasPoint=true;
+                }
+            }else{
+                return false;
+            }
+        }
+        return hasNum;
+    }
+};
+```
+
+### 第十三天（2021-8-3）
+
+------
+
+##### No.54 [字符流中第一个重复的字符](https://www.nowcoder.com/practice/00de97733b8e4f97a3fb5c680ee10720?tpId=13&tags=&title=&difficulty=0&judgeStatus=0&rp=1)
+
+> 请实现一个函数用来找出字符流中第一个只出现一次的字符。例如，当从字符流中只读出前两个字符"go"时，第一个只出现一次的字符是"g"。当从该字符流中读出前六个字符“google"时，第一个只出现一次的字符是"l"。
+>
+> 后台会用以下方式调用Insert 和 FirstAppearingOnce 函数
+>
+> string caseout = "";
+>
+> 1.读入测试用例字符串casein
+>
+> 2.如果对应语言有Init()函数的话，执行Init() 函数
+>
+> 3.循环遍历字符串里的每一个字符ch {
+>
+> Insert(ch);
+>
+> caseout += FirstAppearingOnce()
+>
+> }
+>
+> 4.输出caseout，进行比较。
+
+```c++
+class Solution
+{
+public:
+    vector<char> saveStream;
+    set<char> duplicate;
+  //Insert one char from stringstream
+    void Insert(char ch) {
+        if(duplicate.count(ch)){
+            int i;
+            for(i=0;i<saveStream.size();i++){
+                if(saveStream[i]==ch) break;
+            }
+            if(i<saveStream.size()&&i>=0){
+                saveStream.erase(saveStream.begin()+i);
+            }
+            
+        }else{
+            saveStream.push_back(ch);
+            duplicate.insert(ch);
+        }
+         
+    }
+  //return the first appearence once char in current stringstream
+    char FirstAppearingOnce() {
+        if(saveStream.size()==0){
+            return '#';
+        }else{
+            return saveStream[0];
+        }
+    }
+
+};
+```
+
+1. 初始化一个`unordered_map<char, int> mp, queue<char> q`
+2. 对于`Insert(char ch)`操作， 如果ch是第一次出现，则添加到q中，然后在mp中记录一下次数，如果不是第一次出现，也就是重复了，那么我们就没必要添加到q中，但是还是需要在mp中更新一下次数，因为之后要根据次数来判断是否重复。
+3. 对于`FirstAppearingOnce()`操作，我们直接判断q的头部，然后在mp中检查一下，是否重复，如果没有重复，那就是我们想要的数据。否则，如果重复了，那就应该弹出头部，然后判断下一个头部是否满足要求。
+
+```c++
+class Solution
+{
+public:
+    queue<char> saveStream;
+    unordered_map<char, int> duplicate;
+  //Insert one char from stringstream
+    void Insert(char ch) {
+        saveStream.push(ch);
+        duplicate[ch]++;
+    }
+  //return the first appearence once char in current stringstream
+    char FirstAppearingOnce() {
+        while(!saveStream.empty()){
+            char res=saveStream.front();
+            if(duplicate[res]==1){
+                return res;
+            }else{
+                saveStream.pop();
+            }
+        }
+        return '#';
+    }
+
+};
+```
+
+##### No.55 [链表中环的入口节点](https://www.nowcoder.com/practice/253d2c59ec3e4bc68da16833f79a38e4?tpId=13&tags=&title=&difficulty=0&judgeStatus=0&rp=1)
+
+> 给一个链表，若其中包含环，请找出该链表的环的入口结点，否则，返回null。
+
+快慢指针
+
+从起点开始，快指针每次走两步，慢指针每次走一步，二者相遇之后，慢指针从头开始走，快指针从相遇点开始走，再次相遇的点一定是环的起点。
+
+```c++
+class Solution {
+public:
+    ListNode* EntryNodeOfLoop(ListNode* pHead) {
+        ListNode *slow,*fast;
+        if(pHead->next&&pHead->next->next){
+            slow=pHead->next;
+            fast=pHead->next->next;
+        }else{
+            return NULL;
+        }
+        while(fast&&fast->next&&slow!=fast){
+            slow=slow->next;
+            fast=fast->next->next;
+        }
+        if(!fast||!fast->next){
+            return NULL;
+        }
+        slow=pHead;
+        while(slow!=fast){
+            slow=slow->next;
+            fast=fast->next;
+        }
+        return slow;
+    }
+};
+```
+
+##### No.56 [删除链表中重复的节点](https://www.nowcoder.com/practice/fc533c45b73a41b0b44ccba763f866ef?tpId=13&tags=&title=&difficulty=0&judgeStatus=0&rp=1)
+
+```c++
+class Solution {
+public:
+    ListNode* deleteDuplication(ListNode* pHead) {
+        if(!pHead||!pHead->next){
+            return pHead;
+        }
+        ListNode *pre=new ListNode(-1);
+        pre->next=pHead;
+        ListNode *cur,*net,*head=pre;
+        cur=pHead;
+        net=pHead->next;
+        while(net!=NULL){
+            if(cur->val!=net->val){
+                pre=cur;
+                cur=net;
+                net=net->next;
+            }else{
+                while(net!=NULL&&cur->val==net->val){
+                    net=net->next;
+                }
+                if(net){
+                    cur=net;
+                    pre->next=cur;
+                    net=net->next;
+                }else{
+                    pre->next=NULL;
+                    break;
+                }
+            }
+        }
+        return head->next;
+    }
+};
+```
 
