@@ -2289,3 +2289,221 @@ public:
 };
 ```
 
+### 第十四天（2021-8-8）
+
+##### No.57 [二叉树的下一个节点](https://www.nowcoder.com/practice/9023a0c988684a53960365b889ceaf5e?tpId=13&tags=&title=&difficulty=0&judgeStatus=0&rp=1)
+
+> 给定一个二叉树其中的一个结点，请找出中序遍历顺序的下一个结点并且返回。注意，树中的结点不仅包含左右子结点，同时包含指向父结点的next指针。下图为一棵有9个节点的二叉树。树中从父节点指向子节点的指针用实线表示，从子节点指向父节点的用虚线表示
+
+![](./JZ57.png)
+
+中序遍历的顺序是：左子树-根节点-右子树
+
+因此如果node有右子树的话，结果一定是右子树向下遍历的第一个左节点
+
+如果node没有右子树，那就找到他的父节点，如果该节点是父亲的左子树，则直接返回父亲，如果该节点是父亲的右子树，那么就要对父亲进行同样的判断，知道找到根节点。
+
+```c++
+/*
+struct TreeLinkNode {
+    int val;
+    struct TreeLinkNode *left;
+    struct TreeLinkNode *right;
+    struct TreeLinkNode *next;
+    TreeLinkNode(int x) :val(x), left(NULL), right(NULL), next(NULL) {
+        
+    }
+};
+*/
+class Solution {
+public:
+    TreeLinkNode* GoThrough(TreeLinkNode* node){
+        if(!node->left) return node;
+        TreeLinkNode* a=GoThrough(node->left);
+        return a;
+    }
+    TreeLinkNode* Upward(TreeLinkNode* pNode){
+        TreeLinkNode* father=pNode->next;
+        if(!father) return NULL;
+        if(father->left==pNode) return father;
+        return Upward(father);
+    }
+    TreeLinkNode* GetNext(TreeLinkNode* pNode) {
+        if(pNode->right){
+            return GoThrough(pNode->right);
+        }else{
+            return Upward(pNode);
+        }
+        return NULL;
+    }
+};
+```
+
+##### No.58 [对称的二叉树](https://www.nowcoder.com/practice/ff05d44dfdb04e1d83bdbdab320efbcb?tpId=13&tags=&title=&difficulty=0&judgeStatus=0&rp=1)
+
+> 请实现一个函数，用来判断一棵二叉树是不是对称的。注意，如果一个二叉树同此二叉树的镜像是同样的，定义其为对称的
+
+left=right && left->right=right->left 
+
+```c++
+class Solution {
+public:
+    bool compareSub(TreeNode* p,TreeNode* q){
+        if(p==NULL&&q==NULL) return true;
+        if(p==NULL||q==NULL) return false;
+        if(p->val!=q->val){
+            return false;
+        }
+        bool l=compareSub(p->left, q->right);
+        if(!l) return l;
+        return compareSub(p->left, q->right);
+    }
+    bool isSymmetrical(TreeNode* pRoot) {
+        if(!pRoot){
+            return true;
+        }
+        return compareSub(pRoot->left,pRoot->right);
+    }
+
+};
+```
+
+##### No.59 [按之字形顺序打印二叉树](https://www.nowcoder.com/practice/91b69814117f4e8097390d107d2efbe0?tpId=13&tags=&title=&difficulty=0&judgeStatus=0&rp=1)
+
+> 给定一个二叉树，返回该二叉树的之字形层序遍历，（第一层从左向右，下一层从右向左，一直这样交替）
+
+BFS 利用queue先进先出的特性将每一层的结点逐个插入再取出，但这样打印出的数据都是从左向右的，但是题目要求偶数层的数据从右向左打印，因此用stack暂存，再逆序取出即可。
+
+```c++
+class Solution {
+public:
+    vector<vector<int>> Print(TreeNode* pRoot) {
+        queue<TreeNode*> q;
+        vector<vector<int>> res;
+        if(pRoot) q.push(pRoot);
+        bool seq=true; 
+        while(!q.empty()){
+            int sz=q.size();
+            vector<int> layer;
+            stack<int> st;
+            while(sz--){
+                TreeNode* node=q.front();
+                q.pop();
+                if(seq){
+                    layer.push_back(node->val);
+                }else{
+                    st.push(node->val);
+                }
+                if(node->left) q.push(node->left);
+                if(node->right) q.push(node->right);
+            }
+            if(!seq){
+                while(!st.empty()){
+                    layer.push_back(st.top());
+                    st.pop();
+                }
+            }
+            res.push_back(layer);
+            seq=!seq;
+        }
+        return res;
+    }
+    
+};
+```
+
+##### No.60 [把二叉树打印成多行](https://www.nowcoder.com/practice/445c44d982d04483b04a54f298796288?tpId=13&tags=&title=&difficulty=0&judgeStatus=0&rp=1)
+
+> 从上到下按层打印二叉树，同一层结点从左至右输出。每一层输出一行。
+
+BFS 记录层数标准模板
+
+```c++
+class Solution {
+public:
+    vector<vector<int>> Print(TreeNode* pRoot) {
+        queue<TreeNode*> q;
+        vector<vector<int>> res;
+        if(pRoot) q.push(pRoot);
+        while(!q.empty()){
+            int sz=q.size();
+            vector<int> layer;
+            while(sz--){
+                TreeNode* node=q.front();
+                q.pop();
+                layer.push_back(node->val);
+                
+                if(node->left) q.push(node->left);
+                if(node->right) q.push(node->right);
+            }
+            res.push_back(layer);
+        }
+        return res;
+    }
+};
+```
+
+##### No.62 [二叉搜索树的第k个节点](https://www.nowcoder.com/practice/ef068f602dde4d28aab2b210e859150a?tpId=13&&tqId=11215&rp=1&ru=/ta/coding-interviews&qru=/ta/coding-interviews/question-ranking)
+
+> 给定一棵二叉搜索树，请找出其中的第k小的TreeNode结点。
+
+二叉搜索树：左子树节点的值<根节点<右子树节点的值
+
+因此，中序遍历的结果一定是从小到大按顺序排列
+
+利用中序遍历把排好序的节点放入vector，返回对应结果即可，对边界值做特殊处理。
+
+```c++
+class Solution {
+public:
+    vector<TreeNode*> res;
+    void Tree(TreeNode* p){
+        if(!p){
+            return;
+        }
+        Tree(p->left);
+        res.push_back(p);
+        Tree(p->right);
+        return;
+    }
+    TreeNode* KthNode(TreeNode* pRoot, int k) {
+        Tree(pRoot);
+        if(k-1<0||k-1>=res.size()) return NULL;
+        return res[k-1];
+    }
+};
+```
+
+##### No.63 [数据流中的中位数](https://www.nowcoder.com/practice/9be0172896bd43948f8a32fb954e1be1?tpId=13&tags=&title=&difficulty=0&judgeStatus=0&rp=1)
+
+> 如何得到一个数据流中的中位数？如果从数据流中读出奇数个数值，那么中位数就是所有数值排序之后位于中间的数值。如果从数据流中读出偶数个数值，那么中位数就是所有数值排序之后中间两个数的平均值。我们使用Insert()方法读取数据流，使用GetMedian()方法获取当前读取数据的中位数。
+
+```c++
+class Solution {
+public:
+    vector<int> list;
+    void Insert(int num) {
+        int n=list.size();
+        int i;
+        for(i=0;i<n;i++){
+            if(num<list[i]){
+                break;
+            }
+        }
+        list.insert(list.begin()+i,num);
+    }
+
+    double GetMedian() { 
+        int n=list.size();
+        double mid;
+        if(n%2==1){
+            mid=list[n/2]/1.00;
+        }else{
+            mid=(list[n/2-1]+list[n/2])/2.00;
+        }
+        return mid;
+    }
+
+};
+```
+
